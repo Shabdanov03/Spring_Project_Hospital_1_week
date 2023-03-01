@@ -47,9 +47,19 @@ public class AppointmentApi {
     }
 
     @PostMapping("/{hospitalId}/save")
-    public String saveDepartment(@PathVariable Long hospitalId, @ModelAttribute("newAppointment") Appointment appointment) {
-        appointmentService.saveAppointment(appointment, hospitalId);
-        return "redirect:/appointments/" + hospitalId;
+    public String saveDepartment(@PathVariable Long hospitalId, @ModelAttribute("newAppointment") Appointment appointment,Model model) {
+        try {
+            appointmentService.saveAppointment(appointment, hospitalId);
+            return "redirect:/appointments/" + hospitalId;
+        }catch (RuntimeException e){
+            model.addAttribute("newAppointment", new Appointment());
+            model.addAttribute("patients", patientService.getAllPatients(hospitalId));
+            model.addAttribute("doctors", doctorService.getAllDoctors(hospitalId));
+            model.addAttribute("departments", departmentService.getAllDepartments(hospitalId));
+            model.addAttribute("hospitalId", hospitalId);
+            model.addAttribute("errorDate","date can't be past !");
+            return "appointment/newAppointment";
+        }
     }
 
 
@@ -65,9 +75,19 @@ public class AppointmentApi {
 
     @PutMapping("/{hospitalId}/{id}/update")
     public String update(@PathVariable Long hospitalId,@PathVariable Long id,
-                         @ModelAttribute Appointment appointment){
-        appointmentService.updateAppointment(id,appointment);
-        return "redirect:/appointments/"+hospitalId;
+                         @ModelAttribute Appointment appointment,Model model){
+        try {
+            appointmentService.updateAppointment(id, appointment);
+            return "redirect:/appointments/" + hospitalId;
+        }catch (RuntimeException e){
+            model.addAttribute("appointment",appointmentService.findByAppointmentId(id));
+            model.addAttribute("patients", patientService.getAllPatients(hospitalId));
+            model.addAttribute("doctors", doctorService.getAllDoctors(hospitalId));
+            model.addAttribute("departments", departmentService.getAllDepartments(hospitalId));
+            model.addAttribute("hospId", hospitalId);
+            model.addAttribute("errorDate", "date can't be past !");
+            return "appointment/edit";
+        }
     }
 
     @DeleteMapping("/{hospitalId}/{appointmentId}/delete")

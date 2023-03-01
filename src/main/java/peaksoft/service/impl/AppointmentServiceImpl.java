@@ -42,13 +42,17 @@ public class AppointmentServiceImpl implements AppointmentService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate date = LocalDate.parse(appointment.getInputDate(), formatter);
             oldAppointment.setDate(date);
+
+            if (date.isBefore(LocalDate.now())){
+                throw new RuntimeException();
+            }
             oldAppointment.setPatient(patientRepository.findByPatientId(appointment.getPatientId()));
             oldAppointment.setDepartment(departmentRepository.findByDepartmentId(appointment.getDepartmentId()));
             oldAppointment.setDoctor(doctorRepository.findByDoctorId(appointment.getDoctorId()));
             hospitalRepository.findByHospitalId(hospitalId).getAppointments().add(oldAppointment);
             appointmentRepository.saveAppointment(oldAppointment);
-        } catch (NotFoundException e) {
-            System.out.println(e.getMessage());
+        } catch (RuntimeException e) {
+            throw new RuntimeException();
         }
     }
 

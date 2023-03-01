@@ -41,7 +41,7 @@ public class AppointmentRepImpl implements AppointmentRepository {
     @Override
     public List<Appointment> getAllAppointments(Long id) {
         try {
-            return entityManager.createQuery("select a from Hospital h join h.appointments a where h.id=:id  order by a.date  ", Appointment.class)
+            return entityManager.createQuery("select a from Hospital h join h.appointments a where h.id=:id  order by a.id  ", Appointment.class)
                     .setParameter("id", id).getResultList();
         } catch (NotFoundException e) {
             System.out.println(e.getMessage());
@@ -77,11 +77,14 @@ public class AppointmentRepImpl implements AppointmentRepository {
             DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate date = LocalDate.parse(appointment.getInputDate(), format);
             oldAppointment.setDate(date);
+            if (date.isBefore(LocalDate.now())){
+                throw new RuntimeException();
+            }
             oldAppointment.setPatient(entityManager.find(Patient.class, appointment.getPatientId()));
             oldAppointment.setDepartment(entityManager.find(Department.class, appointment.getDepartmentId()));
             oldAppointment.setDoctor(entityManager.find(Doctor.class, appointment.getDoctorId()));
-        } catch (NotFoundException e) {
-            System.out.println(e.getMessage());
+        } catch (RuntimeException e) {
+            throw new RuntimeException();
         }
     }
 }

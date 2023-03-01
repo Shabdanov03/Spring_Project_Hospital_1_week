@@ -77,7 +77,7 @@ public class HospitalRepImpl implements HospitalRepository {
     @Override
     public List<Hospital> search(String keyWord) {
         try {
-            return entityManager.createQuery("select h from Hospital h where h.name ilike (:keyWord)", Hospital.class)
+            return entityManager.createQuery("select h from Hospital h where h.name ilike %(:keyWord)", Hospital.class)
                     .setParameter("keyWord", "%" + keyWord + "%").getResultList();
         } catch (NotFoundException e) {
             System.out.println(e.getMessage());
